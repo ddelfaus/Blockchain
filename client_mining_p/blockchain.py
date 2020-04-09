@@ -55,6 +55,14 @@ class Blockchain(object):
         # Return the new block
         return block
 
+    def new_transaction(self, sender, recipient, amount):
+
+        self.current_transactions.append( {
+            'sender': sender,
+            'recipient' : recipient,
+            'amount' : amount
+        })
+        return self.last_block['index'] + 1
     def hash(self, block):
         """
         Creates a SHA-256 hash of a Block
@@ -120,7 +128,7 @@ class Blockchain(object):
         """
         guess = f"{block_string}{proof}".encode()
         guess_hash = hashlib.sha256(guess).hexdigest()
-        return guess_hash[:6] == "000000"
+        return guess_hash[:3] == "000"
 
 
 # Instantiate our Node
@@ -145,13 +153,19 @@ def mine():
     submitted_proof = values['proof']
     # Run the proof of work algorithm to get the next proof
     # proof = blockchain.proof_of_work()
-
+    
     block_string = json.dumps(blockchain.last_block, sort_keys=True)
 
     if blockchain.valid_proof(block_string, submitted_proof):
-        # Forge the new Block by adding it to the chain with the proof
+       
+        # adding transaction check
+        blockchain.new_transaction(sender = "0", recipient = values["id"].strip(), amount =1)
+
+         # Forge the new Block by adding it to the chain with the proof
         previous_hash = blockchain.hash(blockchain.last_block)
         block = blockchain.new_block(submitted_proof, previous_hash)
+
+
 
         response = {
             'message': "New Block Forged",
@@ -184,6 +198,19 @@ def return_last_block():
     }
     return jsonify(response), 200
 
+# transaction route from class
+@app.route('/transactions/new', methods=['POST'])
+def new_transaction():
+    values = request.get_json()
+
+    required = ['sender', 'recipient', 'amount']
+    if not all(k in values for k in required):
+        return 'Missing Values', 400
+    
+    index = blockchain.new_transaction(values["sender"], values["recipient"], values["amount"])
+
+    response = {'message': f"Transaction will be added to Block {index}"}
+    return jsonify(response), 200
 
 # Run the program on port 5000
 if __name__ == '__main__':
