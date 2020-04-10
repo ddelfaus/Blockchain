@@ -7,6 +7,18 @@ This app should:
     * Display the current balance for that user
     * Display a list of all transactions for this user, including sender and recipient
 
+    #plan
+    #get chain and grab name and amount of coins
+
+    #display balance
+
+    #change the id
+
+    #display list of transactions
+
+
+
+
 Stretch Goals:
     * Use styling to visually distinguish coins sent and coins received
     * Paginate the list of transactions if there are more than ten
